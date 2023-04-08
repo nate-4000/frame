@@ -45,7 +45,8 @@ block_types = {
 "default.grass": 0x386b27,
 "default.stone": 0x5a5c59,
 "default.tree#log": 0x302525,
-"default.tree#leaves": 0xe2909,
+"default.tree#leaves": 0x0e2909,
+"default.water": 0x00add8,
 "unlisted.player": 0x0000ff
 }
 
