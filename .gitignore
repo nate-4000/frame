@@ -155,3 +155,4 @@ cython_debug/
 .vs/frame/v17/.wsuo
 *.lock
 .vs/ProjectSettings.json
+/.vs/VSWorkspaceState.json
