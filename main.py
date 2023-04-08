@@ -15,7 +15,7 @@ voxels = gas.get("level.json")
 pygame.init()
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("Voxel Renderer")
+pygame.display.set_caption("frame")
 
 clock = pygame.time.Clock()
 
@@ -35,11 +35,10 @@ def draw_voxel(x, y, z, color):
     pygame.draw.polygon(screen, color, hex_points)
 
 def render_voxels(voxels):
-    screen.fill(BLACK)
-    voxels_sorted = sorted(voxels, key=lambda voxel: voxel[2], reverse=True)
-    for voxel in voxels_sorted:
-        x, y, z, color = voxel
-        draw_voxel(x, y, z, color)
+    voxels = sorted(voxels, key=lambda v: v[2], reverse=True)
+    for voxel in voxels:
+        draw_voxel(*voxel)
+
 
 player_x = 3
 player_y = 3
@@ -77,36 +76,14 @@ while running:
                 camera_x += 1
             elif event.key == pygame.K_f:
                 print(player_x, player_y, player_z, voxels, sep="\n")
-    rvoxels = voxels
-    rvoxels_sorted = sorted(rvoxels, key=lambda voxel: voxel[2], reverse=True)
+    
+    rvoxels = voxels + [[player_x, player_y, player_z, player_c]]
+    rvoxels_sorted = sorted(rvoxels, key=lambda v: v[2])
     screen.fill(BLACK)
     for voxel in rvoxels_sorted:
         x, y, z, color = voxel
-        if z < player_z:
-            draw_voxel(x + camera_x, y + camera_y, z, color)
-            draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-        elif z > player_z:
-            draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-            draw_voxel(x + camera_x, y + camera_y, z, color)
-        else:
-                if y < player_y:
-                    draw_voxel(x + camera_x, y + camera_y, z, color)
-                    draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-                elif y > player_y:
-                    draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-                    draw_voxel(x + camera_x, y + camera_y, z, color)
-                else:
-                    if z < player_z:
-                        draw_voxel(x + camera_x, y + camera_y, z, color)
-                        draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-                    elif z > player_z:
-                        draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-                        draw_voxel(x + camera_x, y + camera_y, z, color)
-                    else:
-                        draw_voxel(player_x + camera_x, player_y + camera_y, player_z, player_c)
-    
+        draw_voxel(x + camera_x, y + camera_y, z, color)
     pygame.display.flip()
-    
     clock.tick(60)
     
 pygame.quit()
