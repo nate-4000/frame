@@ -11,7 +11,7 @@ WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 512
 
 voxels = gas.get("level.json")
-
+print(voxels)
 pygame.init()
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -40,10 +40,21 @@ def render_voxels(voxels):
         draw_voxel(*voxel)
 
 
-player_x = 3
-player_y = 3
+block_types = {
+"default.dirt": 0x6b4228,
+"default.grass": 0x386b27,
+"default.stone": 0x5a5c59,
+"default.tree#log": 0x302525,
+"default.tree#leaves": 0xe2909,
+"unlisted.player": 0x0000ff
+}
+
+player_x = 0
+player_y = 0
 player_z = 1
 player_c = 0x0000FF
+
+debug = False
 
 camera_x = 0
 camera_y = 0
@@ -77,12 +88,17 @@ while running:
             elif event.key == pygame.K_f:
                 print(player_x, player_y, player_z, voxels, sep="\n")
     
-    rvoxels = voxels + [[player_x, player_y, player_z, player_c]]
+    rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
     rvoxels_sorted = sorted(rvoxels, key=lambda v: v[2])
     screen.fill(BLACK)
+    if debug:
+        pygame.display.flip()
     for voxel in rvoxels_sorted:
         x, y, z, color = voxel
-        draw_voxel(x + camera_x, y + camera_y, z, color)
+        draw_voxel(x + camera_x, y + camera_y, z, block_types[color])
+        if debug:
+            pygame.display.flip()
+            pygame.time.wait(1)
     pygame.display.flip()
     clock.tick(60)
     
