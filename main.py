@@ -1,4 +1,3 @@
-from multiprocessing import Value
 import pygame
 import math
 import gas
@@ -6,7 +5,7 @@ import gas
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-VOXEL_SIZE = 50
+VOXEL_SIZE = 25
 
 WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 512
@@ -15,7 +14,7 @@ voxels = gas.get("level.json")
 # print(voxels)
 pygame.init()
 
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("frame")
 
 clock = pygame.time.Clock()
@@ -25,7 +24,7 @@ def checkCollision(x, y, z, raiseErr=False):
         if voxel[0] == x and voxel[1] == y and voxel[2] == z: # lookin for blocks
             if raiseErr:
                 raise ValueError
-            return True # yep thats a block
+            return voxel[3] # yep thats a block, return its id
     return False # no block :)
 
 def drawVoxel(x, y, z, color):
@@ -42,6 +41,7 @@ def drawVoxel(x, y, z, color):
         point_y = hex_center_y + hex_radius * math.sin(angle_rad)
         hex_points.append((point_x, point_y))
     pygame.draw.polygon(screen, color, hex_points)
+    pygame.draw.polygon(screen, 0, hex_points, 1)
 
 def renderVoxels(voxels):
     voxels = sorted(voxels, key=lambda v: v[2], reverse=True)
@@ -50,19 +50,24 @@ def renderVoxels(voxels):
 
 
 block_types = {
-"default.dirt": 0x6b4228,
-"default.grass": 0x386b27,
-"default.stone": 0x5a5c59,
-"default.tree#log": 0x302525,
-"default.tree#leaves": 0x0e2909,
-"default.water": 0x00add8,
+"natural.dirt": 0x6b4228,
+"natural.grass": 0x386b27,
+"natural.stone": 0x5a5c59,
+"natural.tree#log": 0x302525,
+"natural.tree#leaves": 0x0e2909,
+"natural.water": 0x00add8,
+"natural.sand": 0xd4c08e,
+"natural.ice": 0xadd8e6,
+"natural.clay": 0xa19035,
+"extra.planks": 0xa3753b,
+"extra.brick": 0x941403,
+"extra.glass": 0x88c6db,
 "unlisted.player": 0x0000ff
 }
 
 player_x = 0
 player_y = 0
 player_z = 1
-player_c = 0x0000FF
 
 debug = False
 
@@ -132,7 +137,7 @@ while running:
         drawVoxel(x + camera_x, y + camera_y, z, block_types[color])
         if debug:
             pygame.display.flip()
-            pygame.time.wait(1)
+            pygame.time.wait(10)
     pygame.display.flip()
     clock.tick(60)
     
