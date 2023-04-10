@@ -64,7 +64,17 @@ block_types = {
 "extra.glass": 0x88c6db,
 "unlisted.player": 0x0000ff
 }
-
+"""
+def sortVoxels(voxels):
+    results = []
+    for voxel1 in voxels:
+        x1, y1, z1, id1 = voxel1
+        for voxel2 in voxels:
+            x2, y2, z2, id2 = voxel2
+            if x1 == x2 and y1 == y2 and z1 == z2:
+                continue
+            killme = (not (x1 >= x2 or x2 >= x1)) and (not (y1 >= y2 or (
+"""
 player_x = 0
 player_y = 0
 player_z = 1
@@ -126,15 +136,16 @@ while running:
                 camera_x += 1
             elif event.key == pygame.K_f:
                 print(player_x, player_y, player_z, voxels, sep="\n")
-    
+            elif event.key == pygame.K_r:
+                voxels = gas.get("level.json") #reloads map
     rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
     rvoxels_sorted = sorted(rvoxels, key=lambda v: v[2])
     screen.fill(BLACK)
     if debug:
         pygame.display.flip()
     for voxel in rvoxels_sorted:
-        x, y, z, color = voxel
-        drawVoxel(x + camera_x, y + camera_y, z, block_types[color])
+        x, y, z, type = voxel
+        drawVoxel(x + camera_x, y + camera_y, z, block_types[type])
         if debug:
             pygame.display.flip()
             pygame.time.wait(10)
