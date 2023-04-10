@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw as gfxdraw
 import math
 import gas
 
@@ -41,7 +42,7 @@ def drawVoxel(x, y, z, color, offset=(0,0)):
         point_y = hex_center_y + hex_radius * math.sin(angle_rad)
         hex_points.append((point_x + offset[0], point_y + offset[1]))
     pygame.draw.polygon(screen, color, hex_points)
-    return pygame.draw.polygon(screen, 0, hex_points, 1)
+    return gfxdraw.aapolygon(screen, hex_points, BLACK)
 
 def renderVoxels(voxels):
     voxels = sorted(voxels, key=lambda v: v[2], reverse=True)
