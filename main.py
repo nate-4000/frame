@@ -138,7 +138,7 @@ while running:
         drawVoxel(x + camera_x, y + camera_y, z, block_types[type])
         if debug:
             pygame.display.flip()
-            pygame.time.wait(10)
+            pygame.time.wait(30)
     pygame.display.flip()
     clock.tick(60)
     
