@@ -35,5 +35,12 @@
 	[ 2, 3, 2, "natural.tree#log"],
 	[ 2, 3, 3, "natural.tree#log"],
 	[ 2, 3, 4, "natural.tree#log"],
-	[ 2, 3, 5, "natural.tree#leaves"]
+	[ 2, 3, 5, "natural.tree#leaves"],
+	[ 2, 2, 4, "natural.tree#leaves"],
+	[ 1, 3, 4, "natural.tree#leaves"],
+	[ 3, 3, 4, "natural.tree#leaves"],
+	[ 2, 4, 4, "natural.tree#leaves"],
+	[ 3, 4, 4, "natural.tree#leaves"],
+	[ 3, 2, 4, "natural.tree#leaves"],
+	[ 1, 4, 4, "natural.tree#leaves"]
 ]

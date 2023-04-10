@@ -27,7 +27,7 @@ def checkCollision(x, y, z, raiseErr=False):
             return voxel[3] # yep thats a block, return its id
     return False # no block :)
 
-def drawVoxel(x, y, z, color):
+def drawVoxel(x, y, z, color, offset=(0,0)):
     iso_x = (x - y) * VOXEL_SIZE / 2
     iso_y = (x + y) * VOXEL_SIZE / 4 - z * VOXEL_SIZE / 2
     hex_radius = VOXEL_SIZE / 2
@@ -39,9 +39,9 @@ def drawVoxel(x, y, z, color):
         angle_rad = math.pi / 180 * angle_deg
         point_x = hex_center_x + hex_radius * math.cos(angle_rad)
         point_y = hex_center_y + hex_radius * math.sin(angle_rad)
-        hex_points.append((point_x, point_y))
+        hex_points.append((point_x + offset[0], point_y + offset[1]))
     pygame.draw.polygon(screen, color, hex_points)
-    pygame.draw.polygon(screen, 0, hex_points, 1)
+    return pygame.draw.polygon(screen, 0, hex_points, 1)
 
 def renderVoxels(voxels):
     voxels = sorted(voxels, key=lambda v: v[2], reverse=True)
@@ -80,25 +80,25 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_w:
                 try:
                     player_y -= 1
                     checkCollision(player_x, player_y, player_z, True)
                 except ValueError:
                     player_y += 1
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_s:
                 try:
                     player_y += 1
                     checkCollision(player_x, player_y, player_z, True)
                 except ValueError:
                     player_y -= 1
-            elif event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_a:
                 try:
                     player_x -= 1
                     checkCollision(player_x, player_y, player_z, True)
                 except ValueError:
                     player_x += 1
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_d:
                 try:
                     player_x += 1
                     checkCollision(player_x, player_y, player_z, True)
@@ -116,18 +116,19 @@ while running:
                     checkCollision(player_x, player_y, player_z, True)
                 except ValueError:
                     player_z -= 1
-            elif event.key == pygame.K_w:
-                camera_y -= 1
-            elif event.key == pygame.K_s:
-                camera_y += 1
-            elif event.key == pygame.K_a:
-                camera_x -= 1
-            elif event.key == pygame.K_d:
                 camera_x += 1
             elif event.key == pygame.K_f:
-                print(player_x, player_y, player_z, voxels, sep="\n")
+                print(player_x, player_y, player_z, voxels, camera_x, camera_y, sep="\n")
             elif event.key == pygame.K_r:
                 voxels = gas.get("level.json") #reloads map
+    
+    
+    center_x, center_y = screen.get_size()
+    center_x //= 2
+    center_y //= 2
+    camera_x = center_x #- (player_x)
+    camera_y = center_y #- (player_y)
+
     rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
     rvoxels_sorted = sorted(rvoxels, key=lambda v: v[0] + v[1] + v[2])
     screen.fill(BLACK)
@@ -135,7 +136,7 @@ while running:
         pygame.display.flip()
     for voxel in rvoxels_sorted:
         x, y, z, type = voxel
-        drawVoxel(x + camera_x, y + camera_y, z, block_types[type])
+        drawVoxel(x - player_x, y - player_y, z, block_types[type], (camera_x, camera_y))
         if debug:
             pygame.display.flip()
             pygame.time.wait(30)
