@@ -35,12 +35,20 @@ def drawVoxel(x, y, z, color, offset=(0,0)):
     hex_center_x = iso_x + hex_radius
     hex_center_y = iso_y + hex_radius / 2
     hex_points = []
+    bad_points = 0
     for i in range(6):
         angle_deg = 60 * i - 30
         angle_rad = math.pi / 180 * angle_deg
         point_x = hex_center_x + hex_radius * math.cos(angle_rad)
         point_y = hex_center_y + hex_radius * math.sin(angle_rad)
         hex_points.append((point_x + offset[0], point_y + offset[1]))
+    for i in hex_points:
+        x, y = i
+        if x > WINDOW_WIDTH or x < 0 or y > WINDOW_HEIGHT or y < 0:
+            bad_points += 1
+            print("bad point ", x, y)
+    if bad_points >= 6:
+        return
     pygame.draw.polygon(screen, color, hex_points)
     return gfxdraw.aapolygon(screen, hex_points, BLACK)
 
@@ -161,9 +169,9 @@ while running:
                 use("right")
     
     
-    center_x, center_y = screen.get_size()
-    center_x //= 2
-    center_y //= 2
+    WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
+    center_x = WINDOW_WIDTH // 2
+    center_y = WINDOW_HEIGHT // 2
     camera_x = center_x 
     camera_y = center_y
 
