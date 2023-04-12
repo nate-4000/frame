@@ -46,7 +46,6 @@ def drawVoxel(x, y, z, color, offset=(0,0)):
         x, y = i
         if x > WINDOW_WIDTH or x < 0 or y > WINDOW_HEIGHT or y < 0:
             bad_points += 1
-            print("bad point ", x, y)
     if bad_points >= 6:
         return
     pygame.draw.polygon(screen, color, hex_points)
