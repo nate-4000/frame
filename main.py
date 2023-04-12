@@ -44,11 +44,6 @@ def drawVoxel(x, y, z, color, offset=(0,0)):
     pygame.draw.polygon(screen, color, hex_points)
     return gfxdraw.aapolygon(screen, hex_points, BLACK)
 
-def renderVoxels(voxels):
-    voxels = sorted(voxels, key=lambda v: v[2], reverse=True)
-    for voxel in voxels:
-        drawVoxel(*voxel)
-
 
 block_types = {
 "natural.dirt": 0x6b4228,
@@ -127,8 +122,8 @@ while running:
     center_x, center_y = screen.get_size()
     center_x //= 2
     center_y //= 2
-    camera_x = center_x #- (player_x)
-    camera_y = center_y #- (player_y)
+    camera_x = center_x 
+    camera_y = center_y
 
     rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
     rvoxels_sorted = sorted(rvoxels, key=lambda v: v[0] + v[1] + v[2])
@@ -137,7 +132,7 @@ while running:
         pygame.display.flip()
     for voxel in rvoxels_sorted:
         x, y, z, type = voxel
-        drawVoxel(x - player_x, y - player_y, z, block_types[type], (camera_x, camera_y))
+        drawVoxel(x - player_x, y - player_y, z - player_z, block_types[type], (camera_x, camera_y))
         if debug:
             pygame.display.flip()
             pygame.time.wait(30)
