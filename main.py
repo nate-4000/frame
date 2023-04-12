@@ -44,6 +44,38 @@ def drawVoxel(x, y, z, color, offset=(0,0)):
     pygame.draw.polygon(screen, color, hex_points)
     return gfxdraw.aapolygon(screen, hex_points, BLACK)
 
+def use(dir):
+    global voxels #cause we gonna be doing things with it
+    if dir == "up":
+        useblock = checkCollision(player_x, player_y - 1, player_z)
+        usepos = (player_x, player_y - 1, player_z)
+    elif dir == "down":
+        useblock = checkCollision(player_x, player_y + 1, player_z)
+        usepos = (player_x, player_y + 1, player_z)
+    elif dir == "left":
+        useblock = checkCollision(player_x - 1, player_y, player_z)
+        usepos = player_x - 1, player_y, player_z
+    elif dir == "right":
+        useblock = checkCollision(player_x - 1, player_y, player_z)
+        usepos = (player_x - 1, player_y, player_z)
+    if not useblock:
+        return
+    if useblock == "functional.door#closed":
+        for i, door in enumerate(voxels): # find that door
+            x, y, z = usepos
+            if door[0] == x and door[1] == y and door[2] == z and door[3] == "functional.door#closed":
+                # found it
+                doorpos = i
+        x, y, z = usepos
+        voxels[doorpos] = [x, y, z+1, "functional.door#open"]
+    elif useblock == "functional.door#open":
+        for i, door in enumerate(voxels): # find that door
+            x, y, z = usepos
+            if door[0] == x and door[1] == y and door[2] == z and door[3] == "functional.door#open":
+                # found it
+                doorpos = i
+        x, y, z = usepos
+        voxels[doorpos] = [x, y, z-1, "functional.door#closed"]
 
 block_types = {
 "natural.dirt": 0x6b4228,
@@ -58,6 +90,8 @@ block_types = {
 "extra.planks": 0xa3753b,
 "extra.brick": 0x941403,
 "extra.glass": 0x88c6db,
+"functional.door#closed": 0x632c0c,
+"functional.door#open": 0x632c0c,
 "unlisted.player": 0x0000ff
 }
 
@@ -117,6 +151,14 @@ while running:
                 print(player_x, player_y, player_z, voxels, camera_x, camera_y, sep="\n")
             elif event.key == pygame.K_r:
                 voxels = gas.get("level.json") #reloads map
+            elif event.key == pygame.K_UP:
+                use("up")
+            elif event.key == pygame.K_DOWN:
+                use("down")
+            elif event.key == pygame.K_LEFT:
+                use("left")
+            elif event.key == pygame.K_RIGHT:
+                use("right")
     
     
     center_x, center_y = screen.get_size()
