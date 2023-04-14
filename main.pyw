@@ -2,11 +2,14 @@ import pygame
 import pygame.gfxdraw as gfxdraw
 import math
 import gas
+import levelgen #map a day keeps the boring away
+import time
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
 VOXEL_SIZE = 25
+CAMERA_ROTATION = 1
 
 WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 512
@@ -158,6 +161,11 @@ while running:
                 print(player_x, player_y, player_z, voxels, camera_x, camera_y, sep="\n")
             elif event.key == pygame.K_r:
                 voxels = gas.get("level.json") #reloads map
+            elif event.key == pygame.K_q:
+                # remake level
+                level_data = levelgen.generate_level(int(time.time()) % 2048)
+                gas.store("level.json", level_data)
+                voxels = gas.get("level.json") #reloads map
             elif event.key == pygame.K_UP:
                 use("up")
             elif event.key == pygame.K_DOWN:
@@ -166,7 +174,13 @@ while running:
                 use("left")
             elif event.key == pygame.K_RIGHT:
                 use("right")
+            elif event.key == pygame.K_l:
+                CAMERA_ROTATION = (CAMERA_ROTATION + 1) % 4
     
+    # BEFORE ANYTHING HAPPENS check if inside ground, then force out if stuck
+    if checkCollision(player_x, player_y, player_z):
+        player_z += 1
+
     
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
     center_x = WINDOW_WIDTH // 2
@@ -175,16 +189,50 @@ while running:
     camera_y = center_y
 
     rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
-    rvoxels_sorted = sorted(rvoxels, key=lambda v: v[0] + v[1] + v[2])
-    screen.fill(BLACK)
-    if debug:
-        pygame.display.flip()
-    for voxel in rvoxels_sorted:
-        x, y, z, type = voxel
-        drawVoxel(x - player_x, y - player_y, z - player_z, block_types[type], (camera_x, camera_y))
+    if CAMERA_ROTATION == 0:
+        rvoxels_sorted = sorted(rvoxels, key=lambda v: v[0] + v[1] + v[2])
+        screen.fill(BLACK)
         if debug:
             pygame.display.flip()
-            pygame.time.wait(30)
+        for voxel in rvoxels_sorted:
+            x, y, z, type = voxel
+            drawVoxel(x - player_x, y - player_y, z - player_z, block_types[type], (camera_x, camera_y))
+            if debug:
+                pygame.display.flip()
+                pygame.time.wait(30)
+    elif CAMERA_ROTATION == 1:
+        rvoxels_sorted = sorted(rvoxels, key=lambda v: v[1] - v[0] + v[2])
+        screen.fill(BLACK)
+        if debug:
+            pygame.display.flip()
+        for voxel in rvoxels_sorted:
+            x, y, z, type = voxel
+            drawVoxel(y - player_y, -(x - player_x), z - player_z, block_types[type], (camera_x, camera_y))
+            if debug:
+                pygame.display.flip()
+                pygame.time.wait(30)
+    elif CAMERA_ROTATION == 2:
+        rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[0] - v[1] + v[2])
+        screen.fill(BLACK)
+        if debug:
+            pygame.display.flip()
+        for voxel in rvoxels_sorted:
+            x, y, z, type = voxel
+            drawVoxel(-(x - player_x), -(y - player_y), z - player_z, block_types[type], (camera_x, camera_y))
+            if debug:
+                pygame.display.flip()
+                pygame.time.wait(30)
+    elif CAMERA_ROTATION == 3:
+        rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[1] + v[0] + v[2])
+        screen.fill(BLACK)
+        if debug:
+            pygame.display.flip()
+        for voxel in rvoxels_sorted:
+            x, y, z, type = voxel
+            drawVoxel(-(y - player_y), x - player_x, z - player_z, block_types[type], (camera_x, camera_y))
+            if debug:
+                pygame.display.flip()
+                pygame.time.wait(30)
     pygame.display.flip()
     clock.tick(60)
     
