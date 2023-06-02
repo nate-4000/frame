@@ -4,6 +4,7 @@ import math
 import gas
 import levelgen #map a day keeps the boring away
 import time
+import blocklogic
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -30,29 +31,6 @@ def checkCollision(x, y, z, raiseErr=False):
                 raise ValueError
             return voxel[3] # yep thats a block, return its id
     return False # no block :)
-
-def drawVoxel(x, y, z, color, offset=(0,0)):
-    iso_x = (x - y) * VOXEL_SIZE / 2
-    iso_y = (x + y) * VOXEL_SIZE / 4 - z * VOXEL_SIZE / 2
-    hex_radius = VOXEL_SIZE / 2
-    hex_center_x = iso_x + hex_radius
-    hex_center_y = iso_y + hex_radius / 2
-    hex_points = []
-    bad_points = 0
-    for i in range(6):
-        angle_deg = 60 * i - 30
-        angle_rad = math.pi / 180 * angle_deg
-        point_x = hex_center_x + hex_radius * math.cos(angle_rad)
-        point_y = hex_center_y + hex_radius * math.sin(angle_rad)
-        hex_points.append((point_x + offset[0], point_y + offset[1]))
-    for i in hex_points:
-        x, y = i
-        if x > WINDOW_WIDTH or x < 0 or y > WINDOW_HEIGHT or y < 0:
-            bad_points += 1
-    if bad_points >= 6:
-        return
-    pygame.draw.polygon(screen, color, hex_points)
-    return gfxdraw.aapolygon(screen, hex_points, BLACK)
 
 def use(dir):
     global voxels #cause we gonna be doing things with it
@@ -115,6 +93,12 @@ camera_x = 0
 camera_y = 0
 
 running = True
+
+preblits = {}
+for key, value in block_types.items():
+    preblits[key] = pygame.Surface((VOXEL_SIZE * 3, VOXEL_SIZE * 2), pygame.SRCALPHA)
+    blocklogic.drawVoxel(preblits[key], VOXEL_SIZE * 3, VOXEL_SIZE * 2, VOXEL_SIZE, pygame, gfxdraw, 0, 0, 0, value, (VOXEL_SIZE * 3 // 2, VOXEL_SIZE), alpha=True)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -196,7 +180,7 @@ while running:
             pygame.display.flip()
         for voxel in rvoxels_sorted:
             x, y, z, type = voxel
-            drawVoxel(x - player_x, y - player_y, z - player_z, block_types[type], (camera_x, camera_y))
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, x - player_x, y - player_y, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
                 pygame.time.wait(30)
@@ -207,7 +191,7 @@ while running:
             pygame.display.flip()
         for voxel in rvoxels_sorted:
             x, y, z, type = voxel
-            drawVoxel(y - player_y, -(x - player_x), z - player_z, block_types[type], (camera_x, camera_y))
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, y - player_y, -(x - player_x), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
                 pygame.time.wait(30)
@@ -218,7 +202,7 @@ while running:
             pygame.display.flip()
         for voxel in rvoxels_sorted:
             x, y, z, type = voxel
-            drawVoxel(-(x - player_x), -(y - player_y), z - player_z, block_types[type], (camera_x, camera_y))
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(x - player_x), -(y - player_y), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
                 pygame.time.wait(30)
@@ -229,7 +213,7 @@ while running:
             pygame.display.flip()
         for voxel in rvoxels_sorted:
             x, y, z, type = voxel
-            drawVoxel(-(y - player_y), x - player_x, z - player_z, block_types[type], (camera_x, camera_y))
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(y - player_y), x - player_x, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
                 pygame.time.wait(30)
