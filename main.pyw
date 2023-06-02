@@ -93,6 +93,7 @@ camera_x = 0
 camera_y = 0
 
 running = True
+font = pygame.font.Font(None, 12)
 
 preblits = {}
 for key, value in block_types.items():
@@ -217,6 +218,9 @@ while running:
             if debug:
                 pygame.display.flip()
                 pygame.time.wait(30)
+    fps = clock.get_fps()
+    fpstext = font.render("fps: %.2f" % fps, True, 0x777777)
+    screen.blit(fpstext, (10, 10))
     pygame.display.flip()
     clock.tick(60)
     
