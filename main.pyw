@@ -9,7 +9,7 @@ import blocklogic
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-VOXEL_SIZE = 25
+VOXEL_SIZE = 15
 CAMERA_ROTATION = 0
 
 WINDOW_WIDTH = 1024
@@ -184,7 +184,6 @@ while running:
             blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, x - player_x, y - player_y, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
-                pygame.time.wait(30)
     elif CAMERA_ROTATION == 1:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: v[1] - v[0] + v[2])
         screen.fill(BLACK)
@@ -195,7 +194,6 @@ while running:
             blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, y - player_y, -(x - player_x), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
-                pygame.time.wait(30)
     elif CAMERA_ROTATION == 2:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[0] - v[1] + v[2])
         screen.fill(BLACK)
@@ -206,7 +204,6 @@ while running:
             blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(x - player_x), -(y - player_y), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
-                pygame.time.wait(30)
     elif CAMERA_ROTATION == 3:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[1] + v[0] + v[2])
         screen.fill(BLACK)
@@ -217,7 +214,6 @@ while running:
             blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(y - player_y), x - player_x, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
             if debug:
                 pygame.display.flip()
-                pygame.time.wait(30)
     fps = clock.get_fps()
     fpstext = font.render("fps: %.2f" % fps, True, 0x777777)
     screen.blit(fpstext, (10, 10))

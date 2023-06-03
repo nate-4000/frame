@@ -7,15 +7,15 @@ import time
 import numpy as np
 
 # Dimensions of the level
-width = 24
-length = 24
+width = 32
+length = 32
 height = 16 # anything larger than this and i get segfaults
 
 # Generate the heightmap using pnoise2
 scale = 20
-octaves = 6
-persistence = 0.4
-lacunarity = 1.3
+octaves = 8
+persistence = 0.5
+lacunarity = 1.2
 
 def get_heightmap(seed):
     noise_values = np.zeros((2*width, 2*length))
@@ -32,14 +32,14 @@ def generate_level(seed):
     print("heightmap gen")
     heightmap = get_heightmap(seed) # <------- segfault here 
     print("starting gen")
-    for x in range(-width, width):
-        for y in range(-length, length):
+    for x in range(-width+width, width+width):
+        for y in range(-length+length, length+length):
             for z in range(height):
                 if z < heightmap[x][y]:
                     if z == heightmap[x][y] - 1:
-                        level.append([x, y, z, "natural.grass"])
+                        level.append([x-(width//2), y-(length//2), z, "natural.grass"])
                     else:
-                        level.append([x, y, z, "natural.dirt"])
+                        level.append([x-(width//2), y-(length//2), z, "natural.dirt"])
     return level
 
 
