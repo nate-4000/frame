@@ -91,6 +91,7 @@ debug = False
 
 camera_x = 0
 camera_y = 0
+seed = int(time.time()) % 2048
 
 running = True
 font = pygame.font.Font(None, 12)
@@ -148,7 +149,8 @@ while running:
                 voxels = gas.get("level.json") #reloads map
             elif event.key == pygame.K_q:
                 # remake level
-                level_data = levelgen.generate_level(int(time.time()) % 2048)
+                seed = int(time.time()) % 2048
+                level_data = levelgen.generate_level(seed)
                 gas.store("level.json", level_data)
                 voxels = gas.get("level.json") #reloads map
             elif event.key == pygame.K_UP:
@@ -216,7 +218,9 @@ while running:
                 pygame.display.flip()
     fps = clock.get_fps()
     fpstext = font.render("fps: %.2f" % fps, True, 0x777777)
+    seedtext = font.render("seed: %d" % seed, True, 0x777777)
     screen.blit(fpstext, (10, 10))
+    screen.blit(seedtext,(10, 30))
     pygame.display.flip()
     clock.tick(60)
     
