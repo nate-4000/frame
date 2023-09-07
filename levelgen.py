@@ -43,7 +43,7 @@ def generate_level(seed):
     return level
 
 
-
-level_data = generate_level(int(time.time()) % 2048)
-with open("level.json", "w") as of:
-    json.dump(level_data, of)
+def dump():
+    level_data = generate_level(int(time.time()) % 2048)
+    with open("level.json", "w") as of:
+        json.dump(level_data, of)

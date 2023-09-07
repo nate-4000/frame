@@ -5,6 +5,7 @@ import gas
 import levelgen #map a day keeps the boring away
 import time
 import blocklogic
+levelgen.dump()
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -95,7 +96,7 @@ seed = int(time.time()) % 2048
 
 running = True
 font = pygame.font.Font(None, 12)
-
+    
 preblits = {}
 for key, value in block_types.items():
     preblits[key] = pygame.Surface((VOXEL_SIZE * 3, VOXEL_SIZE * 2), pygame.SRCALPHA)
@@ -149,10 +150,7 @@ while running:
                 voxels = gas.get("level.json") #reloads map
             elif event.key == pygame.K_q:
                 # remake level
-                seed = int(time.time()) % 2048
-                level_data = levelgen.generate_level(seed)
-                gas.store("level.json", level_data)
-                voxels = gas.get("level.json") #reloads map
+                levelgen.dump()
             elif event.key == pygame.K_UP:
                 use("up")
             elif event.key == pygame.K_DOWN:
