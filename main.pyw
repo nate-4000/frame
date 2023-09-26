@@ -2,7 +2,7 @@ import pygame
 import pygame.gfxdraw as gfxdraw
 import math
 import gas
-import levelgen #map a day keeps the boring away
+import levelgen #map a day keeps the boring debugging away
 import time
 import blocklogic
 levelgen.dump()
@@ -25,17 +25,20 @@ pygame.display.set_caption("frame")
 
 clock = pygame.time.Clock()
 
-def checkCollision(x, y, z, raiseErr=False):
+def checkCollision(x, y, z, raiseErr=False, careAboutDensity=False):
     for voxel in voxels:
         if voxel[0] == x and voxel[1] == y and voxel[2] == z: # lookin for blocks
             if raiseErr:
                 raise ValueError
+            if careAboutDensity and "dense" in block_types[voxel[3]]:
+                if block_types[voxel[3]]["dense"] == False: # different if so that i dont get any KeyErrors
+                    continue
             return voxel[3] # yep thats a block, return its id
     return False # no block :)
 
 def use(dir):
     global voxels #cause we gonna be doing things with it
-    if dir == "up":
+    if dir == "up": # # TODO: make a function for this
         useblock = checkCollision(player_x, player_y - 1, player_z)
         usepos = (player_x, player_y - 1, player_z)
     elif dir == "down":
@@ -56,7 +59,7 @@ def use(dir):
                 # found it
                 doorpos = i
         x, y, z = usepos
-        voxels[doorpos] = [x, y, z+1, "functional.door#open"]
+        voxels[doorpos] = [x, y, z, "functional.door#open"]
     elif useblock == "functional.door#open":
         for i, door in enumerate(voxels): # find that door
             x, y, z = usepos
@@ -64,24 +67,24 @@ def use(dir):
                 # found it
                 doorpos = i
         x, y, z = usepos
-        voxels[doorpos] = [x, y, z-1, "functional.door#closed"]
+        voxels[doorpos] = [x, y, z, "functional.door#closed"]
 
 block_types = {
-"natural.dirt": 0x6b4228,
-"natural.grass": 0x386b27,
-"natural.stone": 0x5a5c59,
-"natural.tree#log": 0x302525,
-"natural.tree#leaves": 0x0e2909,
-"natural.water": 0x00add8,
-"natural.sand": 0xd4c08e,
-"natural.ice": 0xadd8e6,
-"natural.clay": 0xa19035,
-"extra.planks": 0xa3753b,
-"extra.brick": 0x941403,
-"extra.glass": 0x88c6db,
-"functional.door#closed": 0x632c0c,
-"functional.door#open": 0x632c0c,
-"unlisted.player": 0x0000ff
+"natural.dirt": {"color": 0x6b4228},
+"natural.grass": {"color": 0x386b27},
+"natural.stone": {"color": 0x5a5c59},
+"natural.tree#log": {"color": 0x302525},
+"natural.tree#leaves": {"color": 0x0e2909},
+"natural.water": {"color": 0x00add8},
+"natural.sand": {"color": 0xd4c08e},
+"natural.ice": {"color": 0xadd8e6},
+"natural.clay": {"color": 0xa19035},
+"extra.planks": {"color": 0xa3753b},
+"extra.brick": {"color": 0x941403},
+"extra.glass": {"color": 0x88c6db},
+"functional.door#closed": {"color": 0x632c0c},
+"functional.door#open": {"color": 0x632c0c, "dense": False},
+"unlisted.player": {"color": 0x0000ff, "dense": False}
 }
 
 player_x = 0
@@ -97,53 +100,70 @@ seed = int(time.time()) % 2048
 running = True
 font = pygame.font.Font(None, 12)
     
-preblits = {}
+preblits = {} # the optimization that only saved 1 fps
 for key, value in block_types.items():
     preblits[key] = pygame.Surface((VOXEL_SIZE * 3, VOXEL_SIZE * 2), pygame.SRCALPHA)
-    blocklogic.drawVoxel(preblits[key], VOXEL_SIZE * 3, VOXEL_SIZE * 2, VOXEL_SIZE, pygame, gfxdraw, 0, 0, 0, value, (VOXEL_SIZE * 3 // 2, VOXEL_SIZE), alpha=True)
+    blocklogic.drawVoxel(preblits[key], VOXEL_SIZE * 3, VOXEL_SIZE * 2, VOXEL_SIZE, pygame, gfxdraw, 0, 0, 0, value["color"], (VOXEL_SIZE * 3 // 2, VOXEL_SIZE), alpha=True)
+
+# this made me want to install github copilot
+def movePlayer(direction: int):
+    global player_x, player_y, player_z
+    if direction == 0:
+        try:
+            player_y -= 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_y += 1
+    elif direction == 2:
+        try:
+            player_y += 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_y -= 1
+    elif direction == 1:
+        try:
+            player_x -= 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_x += 1
+    elif direction == 3:
+        try:
+            player_x += 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_x -= 1
+    elif direction == 4:
+        try:
+            player_z -= 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_z += 1
+    elif direction == 5:
+        try:
+            player_z += 1
+            checkCollision(player_x, player_y, player_z, True, True)
+        except ValueError:
+            player_z -= 1
+
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                try:
-                    player_y -= 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_y += 1
+            # woohoo less terrible looking code!!
+            if event.key == pygame.K_w: # TODO: fix it going the other direction on odd camera rotations
+                movePlayer((0 + CAMERA_ROTATION) % 4)
             elif event.key == pygame.K_s:
-                try:
-                    player_y += 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_y -= 1
+                movePlayer((2 + CAMERA_ROTATION) % 4) 
             elif event.key == pygame.K_a:
-                try:
-                    player_x -= 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_x += 1
+                movePlayer((1 + CAMERA_ROTATION) % 4)
             elif event.key == pygame.K_d:
-                try:
-                    player_x += 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_x -= 1
+                movePlayer((3 + CAMERA_ROTATION) % 4)
             elif event.key == pygame.K_LCTRL:
-                try:
-                    player_z -= 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_z += 1
+                movePlayer(4)
             elif event.key == pygame.K_LSHIFT:
-                try:
-                    player_z += 1
-                    checkCollision(player_x, player_y, player_z, True)
-                except ValueError:
-                    player_z -= 1
-                camera_x += 1
+                movePlayer(5)
             elif event.key == pygame.K_f:
                 print(player_x, player_y, player_z, voxels, camera_x, camera_y, sep="\n")
             elif event.key == pygame.K_r:
@@ -172,48 +192,32 @@ while running:
     center_y = WINDOW_HEIGHT // 2
     camera_x = center_x 
     camera_y = center_y
-
+    
     rvoxels = voxels + [[player_x, player_y, player_z, "unlisted.player"]]
+    #what the heck is this? put the diff in a function
     if CAMERA_ROTATION == 0:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: v[0] + v[1] + v[2])
-        screen.fill(BLACK)
-        if debug:
-            pygame.display.flip()
-        for voxel in rvoxels_sorted:
-            x, y, z, type = voxel
-            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, x - player_x, y - player_y, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
-            if debug:
-                pygame.display.flip()
     elif CAMERA_ROTATION == 1:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: v[1] - v[0] + v[2])
-        screen.fill(BLACK)
-        if debug:
-            pygame.display.flip()
-        for voxel in rvoxels_sorted:
-            x, y, z, type = voxel
-            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, y - player_y, -(x - player_x), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
-            if debug:
-                pygame.display.flip()
     elif CAMERA_ROTATION == 2:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[0] - v[1] + v[2])
-        screen.fill(BLACK)
-        if debug:
-            pygame.display.flip()
-        for voxel in rvoxels_sorted:
-            x, y, z, type = voxel
-            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(x - player_x), -(y - player_y), z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
-            if debug:
-                pygame.display.flip()
     elif CAMERA_ROTATION == 3:
         rvoxels_sorted = sorted(rvoxels, key=lambda v: -v[1] + v[0] + v[2])
-        screen.fill(BLACK)
+    screen.fill(BLACK)
+    if debug:
+        pygame.display.flip()
+    for voxel in rvoxels_sorted:
+        x, y, z, type = voxel
+        if CAMERA_ROTATION == 0:
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, x - player_x, y - player_y, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
+        elif CAMERA_ROTATION == 1:
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, y - player_y, -x + player_x, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
+        elif CAMERA_ROTATION == 2:
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -x + player_x, -y + player_y, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
+        elif CAMERA_ROTATION == 3:
+            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -y + player_y, x - player_x, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
         if debug:
             pygame.display.flip()
-        for voxel in rvoxels_sorted:
-            x, y, z, type = voxel
-            blocklogic.drawBlit(screen, preblits, VOXEL_SIZE, -(y - player_y), x - player_x, z - player_z, type, (camera_x - (VOXEL_SIZE * 3 // 2), camera_y - VOXEL_SIZE))
-            if debug:
-                pygame.display.flip()
     fps = clock.get_fps()
     fpstext = font.render("fps: %.2f" % fps, True, 0x777777)
     seedtext = font.render("seed: %d" % seed, True, 0x777777)

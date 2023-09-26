@@ -1,6 +1,9 @@
 import math
 
 def is_offscreen(surface, target_surface, offset=(0, 0)):
+    """
+    Checks if a surface is completely offscreen.
+    """
     surface_rect = surface.get_rect()
     surface_rect.x += offset[0]
     surface_rect.y += offset[1]
@@ -17,6 +20,9 @@ def is_offscreen(surface, target_surface, offset=(0, 0)):
 
 
 def drawVoxel(screen, WINDOW_HEIGHT, WINDOW_WIDTH, VOXEL_SIZE, pygame, gfxdraw, x, y, z, color, offset=(0,0), alpha=False):
+    """
+    Draws a voxel at the given coordinates.
+    """
     iso_x = (x - y) * VOXEL_SIZE / 2
     iso_y = (x + y) * VOXEL_SIZE / 4 - z * VOXEL_SIZE / 2
     hex_radius = VOXEL_SIZE / 2
@@ -47,6 +53,9 @@ def drawVoxel(screen, WINDOW_HEIGHT, WINDOW_WIDTH, VOXEL_SIZE, pygame, gfxdraw, 
         return gfxdraw.aapolygon(screen, hex_points, (0,0,0, 255))
 
 def drawBlit(screen, preblits, VOXEL_SIZE, x, y, z, block, offset=(0,0)):
+    """
+    Draws a preblitted voxel at the given coordinates.
+    """
     iso_x = (x - y) * VOXEL_SIZE / 2
     iso_y = (x + y) * VOXEL_SIZE / 4 - z * VOXEL_SIZE / 2
     iso_x += offset[0]
